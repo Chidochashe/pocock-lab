@@ -28,16 +28,33 @@ export function ridesByMonth(rows) {
     const month = row.date.slice(0, 7);
     totals.set(month, (totals.get(month) ?? 0) + Number(row.rides));
   }
+  if (totals.size === 0) return [];
   const max = Math.max(...totals.values());
-  return [...totals.entries()]
-    .sort(([a], [b]) => a.localeCompare(b))
-    .map(([month, rides]) => {
-      const [year, monthNumber] = month.split("-");
-      return {
-        month,
-        label: `${MONTH_NAMES[Number(monthNumber) - 1]} ${year}`,
-        rides,
-        share: max === 0 ? 0 : rides / max,
-      };
-    });
+  const keys = [...totals.keys()].sort();
+  return monthsBetween(keys[0], keys[keys.length - 1]).map((month) => {
+    const [year, monthNumber] = month.split("-");
+    const rides = totals.get(month) ?? 0;
+    return {
+      month,
+      label: `${MONTH_NAMES[Number(monthNumber) - 1]} ${year}`,
+      rides,
+      share: max === 0 ? 0 : rides / max,
+    };
+  });
+}
+
+// Every "YYYY-MM" key from first to last inclusive, rolling December into the next January.
+function monthsBetween(first, last) {
+  let [year, month] = first.split("-").map(Number);
+  const months = [];
+  for (;;) {
+    const key = `${year}-${String(month).padStart(2, "0")}`;
+    months.push(key);
+    if (key === last) return months;
+    month += 1;
+    if (month > 12) {
+      month = 1;
+      year += 1;
+    }
+  }
 }
