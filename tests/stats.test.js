@@ -12,11 +12,24 @@ test("totalRides sums the rides column", () => {
   assert.equal(totalRides(rows), 60);
 });
 
-test("ridesByCity totals per city in alphabetical order", () => {
+test("ridesByCity totals per city in alphabetical order with each city's share of the busiest", () => {
   assert.deepEqual(ridesByCity(rows), [
-    { city: "Boston", rides: 50 },
-    { city: "Miami", rides: 10 },
+    { city: "Boston", rides: 50, share: 1 },
+    { city: "Miami", rides: 10, share: 0.2 },
   ]);
+});
+
+test("ridesByCity gives every city a share of 0 when all city totals are zero", () => {
+  assert.deepEqual(
+    ridesByCity([
+      { date: "2026-07-01", city: "Miami", rides: "0" },
+      { date: "2026-07-01", city: "Boston", rides: 0 },
+    ]),
+    [
+      { city: "Boston", rides: 0, share: 0 },
+      { city: "Miami", rides: 0, share: 0 },
+    ],
+  );
 });
 
 test("ridesByMonth sums ride counts across cities into one monthly total", () => {

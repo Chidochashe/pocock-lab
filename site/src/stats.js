@@ -4,14 +4,15 @@ export function totalRides(rows) {
   return rows.reduce((sum, row) => sum + Number(row.rides), 0);
 }
 
-// Total rides per city, sorted by city name.
+// Total rides per city, sorted by city name, with each city's share of the busiest (0 when all are 0).
 export function ridesByCity(rows) {
   const totals = new Map();
   for (const row of rows) {
     totals.set(row.city, (totals.get(row.city) ?? 0) + Number(row.rides));
   }
+  const max = Math.max(...totals.values());
   return [...totals.entries()]
-    .map(([city, rides]) => ({ city, rides }))
+    .map(([city, rides]) => ({ city, rides, share: max === 0 ? 0 : rides / max }))
     .sort((a, b) => a.city.localeCompare(b.city));
 }
 
