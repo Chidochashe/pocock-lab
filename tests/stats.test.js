@@ -100,3 +100,11 @@ test("ridesByMonth runs from December into January across a year boundary", () =
     ],
   );
 });
+
+test("ridesByMonth finishes when a date isn't zero-padded", () => {
+  const months = ridesByMonth([
+    { date: "2026-07-01", city: "Boston", rides: "10" },
+    { date: "2026-7-15", city: "Miami", rides: "5" },
+  ]);
+  assert.ok(Array.isArray(months));
+});

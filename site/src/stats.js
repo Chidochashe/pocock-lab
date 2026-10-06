@@ -20,7 +20,8 @@ const MONTH_NAMES = [
   "July", "August", "September", "October", "November", "December",
 ];
 
-// Monthly totals across all cities: [{ month: "2026-07", label: "July 2026", rides, share }].
+// Monthly totals across all cities: [{ month: "2026-07", label: "July 2026", rides, share }],
+// covering every month from the earliest to the latest, with 0 for months that have no rows.
 // Month comes from the date string ("YYYY-MM-DD"), never a Date, so labels can't shift by timezone.
 export function ridesByMonth(rows) {
   const totals = new Map();
@@ -30,8 +31,8 @@ export function ridesByMonth(rows) {
   }
   if (totals.size === 0) return [];
   const max = Math.max(...totals.values());
-  const keys = [...totals.keys()].sort();
-  return monthsBetween(keys[0], keys[keys.length - 1]).map((month) => {
+  const months = [...totals.keys()].sort((a, b) => a.localeCompare(b));
+  return monthsBetween(months[0], months[months.length - 1]).map((month) => {
     const [year, monthNumber] = month.split("-");
     const rides = totals.get(month) ?? 0;
     return {
@@ -43,18 +44,19 @@ export function ridesByMonth(rows) {
   });
 }
 
-// Every "YYYY-MM" key from first to last inclusive, rolling December into the next January.
+// Every "YYYY-MM" month from first to last inclusive, rolling December into the next January.
+// Stops once past last, so a malformed key can't loop forever.
 function monthsBetween(first, last) {
-  let [year, month] = first.split("-").map(Number);
+  let [year, monthNumber] = first.split("-").map(Number);
+  const toMonth = () => `${year}-${String(monthNumber).padStart(2, "0")}`;
   const months = [];
-  for (;;) {
-    const key = `${year}-${String(month).padStart(2, "0")}`;
-    months.push(key);
-    if (key === last) return months;
-    month += 1;
-    if (month > 12) {
-      month = 1;
+  for (let month = toMonth(); month <= last; month = toMonth()) {
+    months.push(month);
+    monthNumber += 1;
+    if (monthNumber > 12) {
+      monthNumber = 1;
       year += 1;
     }
   }
+  return months;
 }
