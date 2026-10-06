@@ -44,15 +44,14 @@
 
     const tbody = document.querySelector("#by-city tbody");
     const chart = document.getElementById("chart");
-    const max = Math.max(...byCity.map((d) => d.rides));
-    for (const { city, rides } of byCity) {
+    for (const { city, rides, share } of byCity) {
       const tr = document.createElement("tr");
       tr.innerHTML = `<td>${city}</td><td>${rides.toLocaleString()}</td>`;
       tbody.appendChild(tr);
 
       const bar = document.createElement("div");
       bar.className = "bar";
-      bar.style.width = `${(rides / max) * 100}%`;
+      bar.style.width = `${share * 100}%`;
       bar.textContent = `${city} ${rides.toLocaleString()}`;
       chart.appendChild(bar);
     }
