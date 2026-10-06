@@ -71,3 +71,40 @@ test("ridesByMonth totals a partial month from only the days it has", () => {
     [{ month: "2026-07", label: "July 2026", rides: 15, share: 1 }],
   );
 });
+
+test("ridesByMonth includes a month with no ride counts as a zero monthly total", () => {
+  assert.deepEqual(
+    ridesByMonth([
+      { date: "2026-07-01", city: "Boston", rides: "40" },
+      { date: "2026-09-01", city: "Boston", rides: "20" },
+    ]),
+    [
+      { month: "2026-07", label: "July 2026", rides: 40, share: 1 },
+      { month: "2026-08", label: "August 2026", rides: 0, share: 0 },
+      { month: "2026-09", label: "September 2026", rides: 20, share: 0.5 },
+    ],
+  );
+});
+
+test("ridesByMonth runs from December into January across a year boundary", () => {
+  assert.deepEqual(
+    ridesByMonth([
+      { date: "2027-02-01", city: "Miami", rides: "10" },
+      { date: "2026-11-30", city: "Boston", rides: "10" },
+    ]),
+    [
+      { month: "2026-11", label: "November 2026", rides: 10, share: 1 },
+      { month: "2026-12", label: "December 2026", rides: 0, share: 0 },
+      { month: "2027-01", label: "January 2027", rides: 0, share: 0 },
+      { month: "2027-02", label: "February 2027", rides: 10, share: 1 },
+    ],
+  );
+});
+
+test("ridesByMonth finishes when a date isn't zero-padded", () => {
+  const months = ridesByMonth([
+    { date: "2026-07-01", city: "Boston", rides: "10" },
+    { date: "2026-7-15", city: "Miami", rides: "5" },
+  ]);
+  assert.ok(Array.isArray(months));
+});
